@@ -28,8 +28,13 @@ def test_raspberry_pi_imager_url(json_path):
 
 
 def main():
+    print("Testing shortlinks")
     test_shortlinks()
+
+    print("Testing Raspberry Pi Imager URLs for Anthias")
     test_raspberry_pi_imager_url('https://anthias.screenly.io/rpi-imager.json')
+
+    print("Testing Raspberry Pi Imager URLs for Screenly")
     test_raspberry_pi_imager_url('https://disk-images.screenlyapp.com/pi-imaging-utility.json')
 
 if __name__ == "__main__":
