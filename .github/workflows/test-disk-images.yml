@@ -1,0 +1,23 @@
+name: Test Disk Images
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run disk image download tess
+        run: |
+          python test_disk_image_downloads.py
