@@ -7,7 +7,7 @@ on:
     - cron: '0 0 * * *'  # every day at midnight
 
 jobs:
-  build:
+  test-disk-image-downloads:
     runs-on: ubuntu-latest
 
     steps:
