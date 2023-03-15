@@ -7,7 +7,7 @@ on:
     - cron: '0 * * * *'  # every houry at midnight
 
 jobs:
-  test-disk-image-downloads:
+  automated-qc:
     runs-on: ubuntu-latest
 
     steps:
