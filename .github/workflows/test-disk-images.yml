@@ -20,4 +20,4 @@ jobs:
 
       - name: Run disk image download test
         run: |
-          python test_disk_image_downloads.py
+          python -u test_disk_image_downloads.py
