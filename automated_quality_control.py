@@ -52,6 +52,9 @@ def get_screen_list():
 
 
 def ensure_screen_in_sync(screen_id):
+    """
+    Makes sure a given screen is in sync.
+    """
     response = requests.get(
         f"https://api.screenlyapp.com/api/v3/screens/{screen_id}/",
         headers=REQUEST_HEADERS,
@@ -65,6 +68,10 @@ def ensure_screen_in_sync(screen_id):
 
 @retry(AssertionError, tries=20, delay=10)
 def wait_for_screens_to_sync():
+    """
+    Waits for all screens to be in sync.
+    """
+
     try:
         screens = get_screen_list()
     except:
@@ -78,6 +85,10 @@ def wait_for_screens_to_sync():
 
 
 def get_qc_playlists():
+    """
+    Get all playlist starting with 'QC'
+    """
+
     response = requests.get(
         "https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS
     )
@@ -95,6 +106,9 @@ def get_qc_playlists():
 
 
 def delete_playlist(playlist_id):
+    """
+    Delete a playlist
+    """
     response = requests.delete(
         f"https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/",
         headers=REQUEST_HEADERS,
@@ -103,6 +117,10 @@ def delete_playlist(playlist_id):
 
 
 def create_qc_playlist():
+    """
+    Create a new QC playlist with random assets.
+    """
+
     current_date = datetime.utcnow()
     playlist_name = f"QC {current_date.strftime('%Y-%m-%d @ %H:%M:%S')}"
 

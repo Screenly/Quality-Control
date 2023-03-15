@@ -19,5 +19,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run automated QC script
+        env:
+          SCREENLY_API_TOKEN: ${{ secrets.SCREENLY_API_TOKEN }}
         run: |
           python automated_quality_control.py
