@@ -5,7 +5,7 @@ import requests
 from retry import retry
 from datetime import datetime
 
-API_TOKEN = os.environ.get('API_TOKEN')
+API_TOKEN = os.environ.get('SCREENLY_API_TOKEN')
 REQUEST_HEADERS = {
         'Authorization': f'Token {API_TOKEN}',
         'Content-Type': 'application/json'
