@@ -12,7 +12,7 @@ REQUEST_HEADERS = {
     "Content-Type": "application/json",
 }
 SCREEN_SYNC_THRESHOLD = 60 * 5  # 5 minutes
-
+PLAYLIST_PREFIX = 'QC'
 
 def get_ten_random_assets():
     """
@@ -22,7 +22,6 @@ def get_ten_random_assets():
     response = requests.get(
         "https://api.screenlyapp.com/api/v3/assets/", headers=REQUEST_HEADERS
     )
-
     response.raise_for_status()
 
     asset_count = len(response.json())
@@ -44,7 +43,6 @@ def get_screen_id_list():
     response = requests.get(
         "https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS
     )
-
     response.raise_for_status()
 
     return [screen["id"] for screen in response.json()]
@@ -58,10 +56,17 @@ def ensure_screen_in_sync(screen_id):
         f"https://api.screenlyapp.com/api/v3/screens/{screen_id}/",
         headers=REQUEST_HEADERS,
     )
-
     response.raise_for_status()
 
-    assert response.json()["in_sync"] == True
+    if response.json()['ws_open'] == False:
+        print(f"Screen {screen_id} doesn't have an active WebSocket connection.")
+
+    if not response.json()['status'] == 'Online':
+        print(f"Screen {screen_id} is not online.")
+    else:
+        assert response.json()["in_sync"] == True
+
+
 
 
 @retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD / 10)
@@ -84,18 +89,17 @@ def wait_for_screens_to_sync():
 
 def get_qc_playlist_ids():
     """
-    Get all playlist starting with 'QC'
+    Get all playlist starting with 'PLAYLIST_PREFIX'.
     """
 
     response = requests.get(
         "https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS
     )
-
     response.raise_for_status()
 
     qc_playlists = []
     for playlist in response.json():
-        if playlist["title"].startswith("QC"):
+        if playlist["title"].startswith(PLAYLIST_PREFIX):
             qc_playlists.append(playlist["id"])
 
     return qc_playlists
@@ -103,7 +107,7 @@ def get_qc_playlist_ids():
 
 def delete_playlist(playlist_id):
     """
-    Delete a playlist
+    Delete a playlist.
     """
     response = requests.delete(
         f"https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/",
@@ -118,7 +122,7 @@ def create_qc_playlist():
     """
 
     current_date = datetime.utcnow()
-    playlist_name = f"QC {current_date.strftime('%Y-%m-%d @ %H:%M:%S')}"
+    playlist_name = f"{PLAYLIST_PREFIX} {current_date.strftime('%Y-%m-%d @ %H:%M:%S')}"
 
     assets = []
     for asset in get_ten_random_assets():
@@ -137,7 +141,6 @@ def create_qc_playlist():
         headers=REQUEST_HEADERS,
         json=payload,
     )
-
     response.raise_for_status()
 
 
@@ -171,7 +174,7 @@ def main():
     print("Waiting for screens to sync...")
     wait_for_screens_to_sync()
 
-    print("Automated QC complete! :)")
+    print("Automated QC completed successfully! :)")
 
 
 if __name__ == "__main__":
