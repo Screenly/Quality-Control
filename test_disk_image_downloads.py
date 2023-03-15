@@ -1,5 +1,6 @@
 import requests
 
+
 def test_shortlinks():
     # Short links in the UI
     PI3_SHORTLINK = 'https://go.srly.io/Pi3-20'

@@ -1,9 +1,10 @@
 import os
-import sys
 import random
+import sys
+from datetime import datetime
+
 import requests
 from retry import retry
-from datetime import datetime
 
 API_TOKEN = os.environ.get('SCREENLY_API_TOKEN')
 REQUEST_HEADERS = {
