@@ -142,8 +142,6 @@ def create_qc_playlist():
         json=payload,
     )
 
-    print(response.content)
-
     if not response.ok:
         raise Exception("Unable to create playlist")
 
