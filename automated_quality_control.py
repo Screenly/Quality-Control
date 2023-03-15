@@ -76,7 +76,7 @@ def wait_for_screens_to_sync():
         print("Unable to fetch screens")
         sys.exit(1)
 
-    print("...")
+    print(f"...waiting for {len(screens)} to sync")
 
     for screen in screens:
         ensure_screen_in_sync(screen)
