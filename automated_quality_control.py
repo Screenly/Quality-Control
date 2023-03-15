@@ -12,7 +12,8 @@ REQUEST_HEADERS = {
     "Content-Type": "application/json",
 }
 SCREEN_SYNC_THRESHOLD = 60 * 5  # 5 minutes
-PLAYLIST_PREFIX = 'QC'
+PLAYLIST_PREFIX = "QC"
+
 
 def get_ten_random_assets():
     """
@@ -58,15 +59,13 @@ def ensure_screen_in_sync(screen_id):
     )
     response.raise_for_status()
 
-    if response.json()['ws_open'] == False:
+    if response.json()["ws_open"] == False:
         print(f"Screen {screen_id} doesn't have an active WebSocket connection.")
 
-    if response.json()['status'] == 'Offline':
+    if response.json()["status"] == "Offline":
         print(f"Screen {screen_id} is offline.")
     else:
         assert response.json()["in_sync"] == True
-
-
 
 
 @retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD / 10)
