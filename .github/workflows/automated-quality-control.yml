@@ -1,10 +1,10 @@
-name: Test Disk Images
+name: Automated Quality Control (against real devices)
 
 on:
   push:
   pull_request:
   schedule:
-    - cron: '0 0 * * *'  # every day at midnight
+    - cron: '0 * * * *'  # every houry at midnight
 
 jobs:
   test-disk-image-downloads:
@@ -18,6 +18,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run disk image download test
+      - name: Run automated QC script
         run: |
-          python test_disk_image_downloads.py
+          python automated_quality_control.py
