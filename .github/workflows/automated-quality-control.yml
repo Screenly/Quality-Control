@@ -1,0 +1,25 @@
+name: Automated Quality Control (against real devices)
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 * * * *'  # every houry at midnight
+
+jobs:
+  automated-qc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run automated QC script
+        env:
+          SCREENLY_API_TOKEN: ${{ secrets.SCREENLY_API_TOKEN }}
+        run: |
+          python -u automated_quality_control.py
