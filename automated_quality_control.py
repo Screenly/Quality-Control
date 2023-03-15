@@ -61,8 +61,8 @@ def ensure_screen_in_sync(screen_id):
     if response.json()['ws_open'] == False:
         print(f"Screen {screen_id} doesn't have an active WebSocket connection.")
 
-    if not response.json()['status'] == 'Online':
-        print(f"Screen {screen_id} is not online.")
+    if response.json()['status'] == 'Offline':
+        print(f"Screen {screen_id} is offline.")
     else:
         assert response.json()["in_sync"] == True
 
