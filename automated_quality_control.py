@@ -11,7 +11,8 @@ REQUEST_HEADERS = {
     "Authorization": f"Token {API_TOKEN}",
     "Content-Type": "application/json",
 }
-SCREEN_SYNC_THRESHOLD = 60*5 # 5 minutes
+SCREEN_SYNC_THRESHOLD = 60 * 5  # 5 minutes
+
 
 def get_ten_random_assets():
     """
@@ -22,8 +23,7 @@ def get_ten_random_assets():
         "https://api.screenlyapp.com/api/v3/assets/", headers=REQUEST_HEADERS
     )
 
-    if not response.ok:
-        raise Exception("Unable to fetch assets")
+    response.raise_for_status()
 
     asset_count = len(response.json())
 
@@ -36,7 +36,7 @@ def get_ten_random_assets():
     return asset_list
 
 
-def get_screen_list():
+def get_screen_id_list():
     """
     Return a list of screens in the account.
     """
@@ -45,8 +45,7 @@ def get_screen_list():
         "https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS
     )
 
-    if not response.ok:
-        raise Exception("Unable to fetch screens")
+    response.raise_for_status()
 
     return [screen["id"] for screen in response.json()]
 
@@ -60,20 +59,19 @@ def ensure_screen_in_sync(screen_id):
         headers=REQUEST_HEADERS,
     )
 
-    if not response.ok:
-        raise Exception("Unable to fetch screen")
+    response.raise_for_status()
 
     assert response.json()["in_sync"] == True
 
 
-@retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD/10)
+@retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD / 10)
 def wait_for_screens_to_sync():
     """
     Waits for all screens to be in sync.
     """
 
     try:
-        screens = get_screen_list()
+        screens = get_screen_id_list()
     except:
         print("Unable to fetch screens")
         sys.exit(1)
@@ -84,7 +82,7 @@ def wait_for_screens_to_sync():
         ensure_screen_in_sync(screen)
 
 
-def get_qc_playlists():
+def get_qc_playlist_ids():
     """
     Get all playlist starting with 'QC'
     """
@@ -93,8 +91,7 @@ def get_qc_playlists():
         "https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS
     )
 
-    if not response.ok:
-        raise Exception("Unable to fetch playlists")
+    response.raise_for_status()
 
     qc_playlists = []
     for playlist in response.json():
@@ -141,8 +138,7 @@ def create_qc_playlist():
         json=payload,
     )
 
-    if not response.ok:
-        raise Exception("Unable to create playlist")
+    response.raise_for_status()
 
 
 def main():
@@ -154,7 +150,7 @@ def main():
     wait_for_screens_to_sync()
 
     try:
-        qc_playlists = get_qc_playlists()
+        qc_playlists = get_qc_playlist_ids()
     except:
         print("Unable to fetch playlists")
         sys.exit(1)
@@ -174,6 +170,8 @@ def main():
 
     print("Waiting for screens to sync...")
     wait_for_screens_to_sync()
+
+    print("Automated QC complete! :)")
 
 
 if __name__ == "__main__":
