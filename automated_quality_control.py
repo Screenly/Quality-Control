@@ -11,7 +11,7 @@ REQUEST_HEADERS = {
     "Authorization": f"Token {API_TOKEN}",
     "Content-Type": "application/json",
 }
-
+SCREEN_SYNC_THRESHOLD = 60*5 # 5 minutes
 
 def get_ten_random_assets():
     """
@@ -66,7 +66,7 @@ def ensure_screen_in_sync(screen_id):
     assert response.json()["in_sync"] == True
 
 
-@retry(AssertionError, tries=20, delay=10)
+@retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD/10)
 def wait_for_screens_to_sync():
     """
     Waits for all screens to be in sync.
