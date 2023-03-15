@@ -6,19 +6,20 @@ from datetime import datetime
 import requests
 from retry import retry
 
-API_TOKEN = os.environ.get('SCREENLY_API_TOKEN')
+API_TOKEN = os.environ.get("SCREENLY_API_TOKEN")
 REQUEST_HEADERS = {
-        'Authorization': f'Token {API_TOKEN}',
-        'Content-Type': 'application/json'
-    }
+    "Authorization": f"Token {API_TOKEN}",
+    "Content-Type": "application/json",
+}
+
 
 def get_ten_random_assets():
     """
     Return 10 random assets in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/api/v3/assets/',
-        headers=REQUEST_HEADERS
+    response = requests.get(
+        "https://api.screenlyapp.com/api/v3/assets/", headers=REQUEST_HEADERS
     )
 
     if not response.ok:
@@ -30,7 +31,7 @@ def get_ten_random_assets():
     asset_list = []
     for i in range(10):
         random_index = random.randint(0, asset_count - 1)
-        asset_list.append(response.json()[random_index]['id'])
+        asset_list.append(response.json()[random_index]["id"])
 
     return asset_list
 
@@ -40,25 +41,27 @@ def get_screen_list():
     Return a list of screens in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/api/v3/screens/',
-        headers=REQUEST_HEADERS
+    response = requests.get(
+        "https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS
     )
 
     if not response.ok:
         raise Exception("Unable to fetch screens")
 
-    return [screen['id'] for screen in response.json()]
+    return [screen["id"] for screen in response.json()]
 
 
 def ensure_screen_in_sync(screen_id):
-    response = requests.get(f'https://api.screenlyapp.com/api/v3/screens/{screen_id}/',
-        headers=REQUEST_HEADERS
+    response = requests.get(
+        f"https://api.screenlyapp.com/api/v3/screens/{screen_id}/",
+        headers=REQUEST_HEADERS,
     )
 
     if not response.ok:
         raise Exception("Unable to fetch screen")
 
-    assert response.json()['in_sync'] == True
+    assert response.json()["in_sync"] == True
+
 
 @retry(AssertionError, tries=20, delay=10)
 def wait_for_screens_to_sync():
@@ -75,8 +78,8 @@ def wait_for_screens_to_sync():
 
 
 def get_qc_playlists():
-    response = requests.get('https://api.screenlyapp.com/api/v3/playlists/',
-        headers=REQUEST_HEADERS
+    response = requests.get(
+        "https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS
     )
 
     if not response.ok:
@@ -84,16 +87,17 @@ def get_qc_playlists():
 
     qc_playlists = []
     for playlist in response.json():
-        if playlist['title'].startswith('QC'):
+        if playlist["title"].startswith("QC"):
             print(playlist)
-            qc_playlists.append(playlist['id'])
+            qc_playlists.append(playlist["id"])
 
     return qc_playlists
 
 
 def delete_playlist(playlist_id):
-    response = requests.delete(f'https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/',
-        headers=REQUEST_HEADERS
+    response = requests.delete(
+        f"https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/",
+        headers=REQUEST_HEADERS,
     )
     return response.ok
 
@@ -107,16 +111,17 @@ def create_qc_playlist():
         assets.append({"id": asset, "duration": 10})
 
     payload = {
-        'title': playlist_name,
-        'groups': [{'id': 'all-screens'}],
-        'is_enabled': True,
-        'assets': assets,
-        "predicate": "TRUE"
+        "title": playlist_name,
+        "groups": [{"id": "all-screens"}],
+        "is_enabled": True,
+        "assets": assets,
+        "predicate": "TRUE",
     }
 
-    response = requests.post('https://api.screenlyapp.com/api/v3/playlists/',
+    response = requests.post(
+        "https://api.screenlyapp.com/api/v3/playlists/",
         headers=REQUEST_HEADERS,
-        json=payload
+        json=payload,
     )
 
     print(response.content)
