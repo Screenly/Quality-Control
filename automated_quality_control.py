@@ -99,7 +99,6 @@ def get_qc_playlists():
     qc_playlists = []
     for playlist in response.json():
         if playlist["title"].startswith("QC"):
-            print(playlist)
             qc_playlists.append(playlist["id"])
 
     return qc_playlists
