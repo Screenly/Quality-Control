@@ -8,4 +8,6 @@ This script runs nightly to ensure that all disk images are available. Includes 
 
 ## `automated_quality_control.py`
 
+[![Automated Quality Control (against real devices)](https://github.com/Screenly/Quality-Control/actions/workflows/automated-quality-control.yml/badge.svg)](https://github.com/Screenly/Quality-Control/actions/workflows/automated-quality-control.yml)
+
 This script runs every hour and schedules random assets against *real* Screenly devices and ensures that they sync the assets properly.
