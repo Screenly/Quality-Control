@@ -11,7 +11,7 @@ REQUEST_HEADERS = {
     "Authorization": f"Token {API_TOKEN}",
     "Content-Type": "application/json",
 }
-SCREEN_SYNC_THRESHOLD = 60 * 5  # 5 minutes
+SCREEN_SYNC_THRESHOLD = 60 * 6  # 6 minutes
 PLAYLIST_PREFIX = "QC"
 
 
