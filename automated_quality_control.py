@@ -21,7 +21,8 @@ def get_ten_random_assets():
     """
 
     response = requests.get(
-        "https://api.screenlyapp.com/api/v3/assets/", headers=REQUEST_HEADERS
+        'https://api.screenlyapp.com/api/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")',
+        headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
 
@@ -41,9 +42,7 @@ def get_screen_id_list():
     Return a list of screens in the account.
     """
 
-    response = requests.get(
-        "https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS
-    )
+    response = requests.get("https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     return [screen["id"] for screen in response.json()]
@@ -91,9 +90,7 @@ def get_qc_playlist_ids():
     Get all playlist starting with 'PLAYLIST_PREFIX'.
     """
 
-    response = requests.get(
-        "https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS
-    )
+    response = requests.get("https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     qc_playlists = []
