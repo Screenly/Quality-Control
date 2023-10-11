@@ -145,13 +145,19 @@ def main():
         print("API_TOKEN is not set")
         sys.exit(1)
 
-    print("Performing initial screen sync check...")
-    wait_for_screens_to_sync()
+    # We don't need this as if we were fixing something that should
+    # improve sync after the playlist update, we would never be able
+    # to detect recovery after our fix without manual interaction
+    # print("Performing initial screen sync check...")
+    # wait_for_screens_to_sync()
 
     try:
         qc_playlists = get_qc_playlist_ids()
-    except:
-        print("Unable to fetch playlists")
+    except requests.HTTPError as error:
+        print(f"Unable to fetch playlists: {error.response.json()}")
+        sys.exit(1)
+    except Exception as error:
+        print(f"Unable to fetch playlists: error")
         sys.exit(1)
 
     print("Cleaning up old QC playlist...")
@@ -163,8 +169,11 @@ def main():
     print("Creating new QC playlist...")
     try:
         create_qc_playlist()
-    except:
-        print("Unable to create playlist")
+    except requests.HTTPError as error:
+        print(f"Unable to create playlist: {error.response.json()}")
+        sys.exit(1)
+    except Exception as error:
+        print(f"Unable to create playlist: {error}")
         sys.exit(1)
 
     print("Waiting for screens to sync...")
