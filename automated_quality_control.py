@@ -21,7 +21,7 @@ def get_ten_random_assets():
     """
 
     response = requests.get(
-        'https://api.screenlyapp.com/api/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")',
+        'https://api.screenlyapp.com/api/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
