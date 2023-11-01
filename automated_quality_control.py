@@ -21,7 +21,7 @@ def get_ten_random_assets():
     """
 
     response = requests.get(
-        'https://api.screenlyapp.com/api/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
+        'https://api.screenlyapp.com/api/v4/assets?select=id,type&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -32,7 +32,7 @@ def get_ten_random_assets():
     asset_list = []
     for i in range(10):
         random_index = random.randint(0, asset_count - 1)
-        asset_list.append(response.json()[random_index]["id"])
+        asset_list.append(response.json()[random_index])
 
     return asset_list
 
@@ -122,7 +122,7 @@ def create_qc_playlist():
 
     assets = []
     for asset in get_ten_random_assets():
-        assets.append({"id": asset, "duration": 10})
+        assets.append({"id": asset["id"], "duration": 30 if asset["type"] in ["web", "edge-app"] else 10})
 
     payload = {
         "title": playlist_name,
