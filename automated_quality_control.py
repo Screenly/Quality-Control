@@ -45,7 +45,7 @@ def get_screen_id_list():
     response = requests.get("https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
-    return [screen["id"] for screen in response.json() if screen["enabled"]]
+    return [screen["id"] for screen in response.json() if screen["is_enabled"]]
 
 
 def ensure_screen_in_sync(screen_id):
@@ -75,8 +75,8 @@ def wait_for_screens_to_sync():
 
     try:
         screens = get_screen_id_list()
-    except:
-        print("Unable to fetch screens")
+    except Exception as error:
+        print(f"Unable to fetch screens: {error}")
         sys.exit(1)
 
     print(f"...waiting for {len(screens)} screen(s) to sync")
@@ -157,7 +157,7 @@ def main():
         print(f"Unable to fetch playlists: {error.response.json()}")
         sys.exit(1)
     except Exception as error:
-        print(f"Unable to fetch playlists: error")
+        print(f"Unable to fetch playlists: {error}")
         sys.exit(1)
 
     print("Cleaning up old QC playlist...")
