@@ -45,7 +45,7 @@ def get_screen_id_list():
     response = requests.get("https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
-    return [screen["id"] for screen in response.json()]
+    return [screen["id"] for screen in response.json() if screen["enabled"]]
 
 
 def ensure_screen_in_sync(screen_id):
