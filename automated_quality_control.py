@@ -42,9 +42,8 @@ def get_screen_id_list():
     Return a list of screens in the account.
     """
 
-    response = requests.get("https://api.screenlyapp.com/api/v3/screens/", headers=REQUEST_HEADERS)
+    response = requests.get('https://api.screenlyapp.com/api/v4/screens?select=id,is_enabled&type=eq.hardware', headers=REQUEST_HEADERS)
     response.raise_for_status()
-
     return [screen["id"] for screen in response.json() if screen["is_enabled"]]
 
 
@@ -75,6 +74,9 @@ def wait_for_screens_to_sync():
 
     try:
         screens = get_screen_id_list()
+    except requests.HTTPError as error:
+        print(f"Unable to fetch screens: {error}: {error.response.content}")
+        sys.exit(1)
     except Exception as error:
         print(f"Unable to fetch screens: {error}")
         sys.exit(1)
