@@ -2,6 +2,7 @@ import os
 import random
 import sys
 from datetime import datetime
+from typing import Any, Dict, List
 
 import requests
 from retry import retry
@@ -37,33 +38,14 @@ def get_ten_random_assets():
     return asset_list
 
 
-def get_screen_id_list():
+def get_screens() -> List[Dict[str, Any]]:
     """
     Return a list of screens in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/api/v4/screens?select=id,is_enabled&type=eq.hardware', headers=REQUEST_HEADERS)
+    response = requests.get('https://api.screenlyapp.com/api/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
     response.raise_for_status()
-    return [screen["id"] for screen in response.json() if screen["is_enabled"]]
-
-
-def ensure_screen_in_sync(screen_id):
-    """
-    Makes sure a given screen is in sync.
-    """
-    response = requests.get(
-        f"https://api.screenlyapp.com/api/v3/screens/{screen_id}/",
-        headers=REQUEST_HEADERS,
-    )
-    response.raise_for_status()
-
-    if response.json()["ws_open"] == False:
-        print(f"Screen {screen_id} doesn't have an active WebSocket connection.")
-
-    if response.json()["status"] == "Offline":
-        print(f"Screen {screen_id} is offline.")
-    else:
-        assert response.json()["in_sync"] == True
+    return response.json()
 
 
 @retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD / 10)
@@ -73,7 +55,7 @@ def wait_for_screens_to_sync():
     """
 
     try:
-        screens = get_screen_id_list()
+        screens = get_screens()
     except requests.HTTPError as error:
         print(f"Unable to fetch screens: {error}: {error.response.content}")
         sys.exit(1)
@@ -81,10 +63,17 @@ def wait_for_screens_to_sync():
         print(f"Unable to fetch screens: {error}")
         sys.exit(1)
 
-    print(f"...waiting for {len(screens)} screen(s) to sync")
+    if all(screen['in_sync'] for screen in screens):
+        return
 
-    for screen in screens:
-        ensure_screen_in_sync(screen)
+    screens_not_in_sync = [screen for screen in screens if not screen['in_sync']]
+
+    print(f"...waiting for {len(screens_not_in_sync)} screen(s) to sync")
+
+    for screen in screens_not_in_sync:
+        print(f"{screen['name']}({screen['hostname']}) not in sync: {screen['status'].lower()}")
+
+    raise AssertionError("Not all screens syncrhonized")
 
 
 def get_qc_playlist_ids():
