@@ -73,7 +73,7 @@ def wait_for_screens_to_sync():
     for screen in screens_not_in_sync:
         print(f"{screen['name']}({screen['hostname']}) not in sync: {screen['status'].lower()}")
 
-    raise AssertionError("Not all screens syncrhonized")
+    raise AssertionError("Not all screens synchronized")
 
 
 def get_qc_playlist_ids():
