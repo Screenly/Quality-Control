@@ -43,7 +43,7 @@ def get_screens() -> List[Dict[str, Any]]:
     Return a list of screens in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/api/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
+    response = requests.get('https://api.screenlyapp.com/api/v4.1/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
     response.raise_for_status()
     return response.json()
 
