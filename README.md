@@ -16,4 +16,4 @@ This script runs every hour and schedules random assets against *real* Screenly 
 
 [![Manual Quality Control (against real devices)](https://github.com/Screenly/Quality-Control/actions/workflows/manual-quality-control.yml/badge.svg)](https://github.com/Screenly/Quality-Control/actions/workflows/manual-quality-control.yml)
 
-This script is used to manually check the quality of a specific client version against real devices. It can be run manually by clicking the "Run workflow" button in the GitHub Actions UI.
+This script allows manual verification of a specific client version on *real* devices. It is triggered by clicking the "Run workflow" button in the GitHub Actions UI, where you must input the *client version* to confirm that the QC device is running the correct one.
