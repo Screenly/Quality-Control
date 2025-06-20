@@ -2,8 +2,12 @@ import os
 import random
 import sys
 import argparse
+import re
 from datetime import datetime
 from typing import Any, Dict, List
+
+from google.cloud import storage
+from datetime import datetime, timezone, timedelta
 
 import requests
 from retry import retry
@@ -14,6 +18,30 @@ REQUEST_HEADERS = {
     "Authorization": f"Token {API_TOKEN}",
     "Content-Type": "application/json",
 }
+
+def list_blobs(hostname: str):
+    # Initialize GCS client
+    client = storage.Client(project='srly-prod')
+
+    # Set your bucket name and the prefix (like a directory)
+    bucket_name = 'srly-prod-uploads'
+    prefix = f'{hostname}/logs/'  # Optional, set '' for all files
+
+    # Time range: now and 24 hours ago
+    now = datetime.now(timezone.utc)
+    cutoff_time = now - timedelta(hours=24)
+
+    # Access the bucket
+    bucket = client.bucket(bucket_name)
+
+    # List blobs (files) with prefix
+    blobs = client.list_blobs(bucket, prefix=prefix)
+
+    # Filter blobs created within the last 24 hours
+    recent_blobs = [blob for blob in blobs if blob.time_created >= cutoff_time]
+
+    return recent_blobs
+
 
 
 def get_screens() -> List[Dict[str, Any]]:
@@ -32,19 +60,29 @@ def main():
 
 
     screens = get_screens()
+    screens = [screen for screen in screens if '-armhf-' not in screen['report']['client_version']]
+    version_mismatch_screens = []
+    for screen in screens:
+        version = screen['report']['client_version']
+        version_tail = re.search(r'.*-(\d+\.\d+\.\d+-.*)', version).group(1)
+        print(version_tail)
+        if not version_tail.startswith(args.client_version):
+            version_mismatch_screens.append(screen)
+
     print(screens)
 
-
-    version_mismatch_screens = [
-    screen for screen in screens
-      if screen["report"]["client_version"] != args.client_version
-    ]
 
     if version_mismatch_screens:
         print(f"Version mismatch for {len(version_mismatch_screens)} screens")
         for screen in version_mismatch_screens:
             print(f"Screen {screen['id']} has version {screen['report']['client_version']}")
         sys.exit(1)
+
+    for screen in screens:
+        print(screen['hostname'])
+        for blob in list_blobs(screen['hostname']):
+            print(blob.name)
+
 
 
 if __name__ == "__main__":
