@@ -117,7 +117,6 @@ def main():
     for screen in screens:
         version = screen['report']['client_version']
         version_tail = re.search(r'.*-(\d+\.\d+\.\d+-.*)', version).group(1)
-        print(version_tail)
         if not version_tail.startswith(args.client_version):
             version_mismatch_screens.append(screen)
 
