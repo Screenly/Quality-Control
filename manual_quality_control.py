@@ -154,8 +154,9 @@ def main():
 
         # Check for OOM errors
         oom_errors = check_for_oom_errors(log_content)
-
-        if oom_errors:
+        if not oom_errors:
+            print(f"  ✅ No OOM errors found")
+        else:
             print(f"  ⚠️  FOUND {len(oom_errors)} OOM ERROR(S):")
             oom_screens.append({
                 'hostname': hostname,
@@ -167,8 +168,6 @@ def main():
                 print(f"    {error}")
             if len(oom_errors) > 5:
                 print(f"    ... and {len(oom_errors) - 5} more errors")
-        else:
-            print(f"  ✅ No OOM errors found")
 
     # Summary report
     print(f"\n{'='*60}")
