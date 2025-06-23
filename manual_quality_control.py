@@ -139,7 +139,7 @@ def main():
         if is_recent:
             print(f"  ✅ Blob created within last 24 hours - checking for OOM errors")
         else:
-            print(f"  ⚠️  Blob not created in last 24 hours, but here is the latest blob checking details")
+            print(f"  ⚠️  Blob not created in last 24 hours, but here is the latest blob log file details")
 
         # Download and check log content
         log_content = download_blob_content(latest_blob)

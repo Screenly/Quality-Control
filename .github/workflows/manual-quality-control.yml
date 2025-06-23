@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       client_version:
-        description: 'Client version to check'
+        description: 'Client version to check [e.g. 4.1.0-r2]'
         required: true
         type: string
 
