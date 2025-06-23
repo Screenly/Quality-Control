@@ -177,17 +177,17 @@ def main():
     print(f"Total screens checked: {len(screens)}")
     print(f"Screens with OOM errors: {len(oom_screens)}")
 
-    if oom_screens:
-        print(f"\nScreens with OOM errors:")
-        for screen_info in oom_screens:
-            print(f"  - {screen_info['hostname']} (ID: {screen_info['screen_id']})")
-            print(f"    Log file: {screen_info['log_file']}")
-            print(f"    OOM errors found: {len(screen_info['oom_errors'])}")
-
-        # Exit with error code if OOM errors found
-        sys.exit(1)
-    else:
+    if not oom_screens:
         print(f"\n✅ No OOM errors found in any screens!")
+        return
+
+    print(f"\nScreens with OOM errors:")
+    for screen_info in oom_screens:
+        print(f"  - {screen_info['hostname']} (ID: {screen_info['screen_id']})")
+        print(f"    Log file: {screen_info['log_file']}")
+        print(f"    OOM errors found: {len(screen_info['oom_errors'])}")
+
+    sys.exit(1)
 
 
 if __name__ == "__main__":
