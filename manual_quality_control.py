@@ -74,7 +74,7 @@ def check_for_oom_errors(log_content: str) -> List[str]:
     Check log content for Out of Memory (OOM) errors.
     Returns a list of matching OOM error lines.
     """
-    oom_regex = r'(?i)(oom|memory.*killed|(?:out of|cannot allocate|killed|fatal|segmentation fault).*memory)'
+    oom_regex = r'(?i)(\boom\b|out\s+of\s+memory|cannot\s+allocate\s+memory|memory.*killed|killed.*memory|fatal.*memory|segmentation\s+fault.*memory)'
 
     oom_errors = []
     lines = log_content.split('\n')
@@ -129,8 +129,17 @@ def main():
             print(f"  No log files found for {hostname}")
             continue
 
+        # Check if the blob was created in the last 24 hours
+        now = datetime.now(timezone.utc)
+        cutoff_time = now - timedelta(hours=24)
+        is_recent = latest_blob.time_created >= cutoff_time
+
         print(f"  Latest log file: {latest_blob.name}")
         print(f"  Created: {latest_blob.time_created}")
+        if is_recent:
+            print(f"  ✅ Blob created within last 24 hours - checking for OOM errors")
+        else:
+            print(f"  ⚠️  Blob not created in last 24 hours, but here is the latest blob checking details")
 
         # Download and check log content
         log_content = download_blob_content(latest_blob)
