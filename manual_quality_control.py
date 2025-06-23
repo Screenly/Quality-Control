@@ -74,26 +74,14 @@ def check_for_oom_errors(log_content: str) -> List[str]:
     Check log content for Out of Memory (OOM) errors.
     Returns a list of matching OOM error lines.
     """
-    oom_patterns = [
-        r'out of memory',
-        r'OOM',
-        r'oom',
-        r'Out of memory',
-        r'killed.*memory',
-        r'memory.*killed',
-        r'Cannot allocate memory',
-        r'fatal.*memory',
-        r'segmentation fault.*memory'
-    ]
+    oom_regex = r'(?i)(oom|memory.*killed|(?:out of|cannot allocate|killed|fatal|segmentation fault).*memory)'
 
     oom_errors = []
     lines = log_content.split('\n')
 
     for line in lines:
-        for pattern in oom_patterns:
-            if re.search(pattern, line, re.IGNORECASE):
-                oom_errors.append(line.strip())
-                break  # Avoid duplicate matches for the same line
+        if re.search(oom_regex, line):
+            oom_errors.append(line.strip())
 
     return oom_errors
 
