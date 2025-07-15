@@ -4,7 +4,7 @@ import requests
 def test_shortlinks():
     # Short links in the UI
     PI3_SHORTLINK = "https://go.srly.io/Pi3-20"
-    PI3_SHORTLINK_MD5 = "https://go.srly.io/Pi3-20-md5"
+    PI3_SHORTLINK_MD5 = "https://go.srly.io/Pi3-20_md5"
     PI4_SHORTLINK = "https://go.srly.io/RPi4"
     PI4_SHORTLINK_MD5 = "https://go.srly.io/RPi4_md5"
 
