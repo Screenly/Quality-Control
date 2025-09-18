@@ -4,15 +4,15 @@ import requests
 def test_shortlinks():
     # Short links in the UI
     PI3_SHORTLINK = "https://go.srly.io/Pi3-20"
-    PI3_SHORTLINK_MD5 = "https://go.srly.io/Pi3-20_md5"
+    PI3_SHORTLINK_SHA256 = "https://go.srly.io/Pi3-20_sha256"
     PI4_SHORTLINK = "https://go.srly.io/RPi4"
-    PI4_SHORTLINK_MD5 = "https://go.srly.io/RPi4_md5"
+    PI4_SHORTLINK_SHA256 = "https://go.srly.io/RPi4_sha256"
 
     # Test the shortlinks for the Pi3 and Pi4
     assert requests.head(PI3_SHORTLINK, allow_redirects=True).status_code == 200
-    assert requests.head(PI3_SHORTLINK_MD5, allow_redirects=True).status_code == 200
+    assert requests.head(PI3_SHORTLINK_SHA256, allow_redirects=True).status_code == 200
     assert requests.head(PI4_SHORTLINK, allow_redirects=True).status_code == 200
-    assert requests.head(PI4_SHORTLINK_MD5, allow_redirects=True).status_code == 200
+    assert requests.head(PI4_SHORTLINK_SHA256, allow_redirects=True).status_code == 200
     print("All shortlinks are working")
 
 
