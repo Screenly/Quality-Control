@@ -116,11 +116,12 @@ def add_asset_to_playlist(playlist_id, asset_id):
     Add a single asset to a playlist.
     """
     payload = {
+        "playlist_id": playlist_id,
         "asset_id": asset_id,
         "duration": 10,
     }
     response = requests.post(
-        f"https://api.screenlyapp.com/api/v4/playlist-items/?playlist_id=eq.{playlist_id}",
+        "https://api.screenlyapp.com/api/v4/playlist-items/",
         headers=REQUEST_HEADERS,
         json=payload,
     )
