@@ -179,7 +179,8 @@ def main():
     if len(qc_playlists) > 0:
         print("Found a QC playlist. Deleting it...")
         for playlist in qc_playlists:
-            delete_playlist(playlist)
+            if not delete_playlist(playlist):
+                print(f"Warning: failed to delete playlist {playlist}")
 
     print("Creating new QC playlist...")
     try:
