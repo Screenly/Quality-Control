@@ -122,7 +122,7 @@ def add_asset_to_playlist(playlist_id, asset_id):
     }
     response = requests.post(
         "https://api.screenlyapp.com/api/v4/playlist-items/",
-        headers=REQUEST_HEADERS,
+        headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
     response.raise_for_status()
@@ -144,12 +144,13 @@ def create_qc_playlist():
 
     response = requests.post(
         "https://api.screenlyapp.com/api/v4/playlists/",
-        headers=REQUEST_HEADERS,
+        headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
     response.raise_for_status()
 
-    playlist_id = response.json()["id"]
+    data = response.json()
+    playlist_id = data[0]["id"] if isinstance(data, list) else data["id"]
 
     for asset_id in get_ten_random_assets():
         add_asset_to_playlist(playlist_id, asset_id)
@@ -169,7 +170,7 @@ def main():
     try:
         qc_playlists = get_qc_playlist_ids()
     except requests.HTTPError as error:
-        print(f"Unable to fetch playlists: {error.response.json()}")
+        print(f"Unable to fetch playlists: {error.response.status_code} {error.response.text}")
         sys.exit(1)
     except Exception as error:
         print(f"Unable to fetch playlists: {error}")
@@ -186,7 +187,7 @@ def main():
     try:
         create_qc_playlist()
     except requests.HTTPError as error:
-        print(f"Unable to create playlist: {error.response.json()}")
+        print(f"Unable to create playlist: {error.response.status_code} {error.response.text}")
         sys.exit(1)
     except Exception as error:
         print(f"Unable to create playlist: {error}")
