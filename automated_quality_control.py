@@ -178,7 +178,19 @@ def main():
     try:
         wait_for_screens_to_sync()
     except AssertionError as error:
-        print(f"Warning: {error}. Some online screens did not sync within the timeout window.")
+        print(f"Warning: {error}. Fetching final screen status...")
+        try:
+            final_screens = get_screens()
+            not_synced = [s for s in final_screens if not s['in_sync']]
+            offline = [s for s in not_synced if s['status'].lower() == 'offline']
+            out_of_sync = [s for s in not_synced if s['status'].lower() != 'offline']
+            print(f"Final status: {len(offline)} offline, {len(out_of_sync)} out of sync after timeout:")
+            for s in offline:
+                print(f"  OFFLINE: {s['name']}({s['hostname']})")
+            for s in out_of_sync:
+                print(f"  OUT OF SYNC: {s['name']}({s['hostname']}) — {s['status'].lower()}")
+        except Exception as fetch_error:
+            print(f"Could not fetch final screen status: {fetch_error}")
 
     print("Automated QC completed successfully! :)")
 
