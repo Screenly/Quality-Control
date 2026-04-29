@@ -1,7 +1,7 @@
 import os
 import random
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 import requests
@@ -51,7 +51,8 @@ def get_screens() -> List[Dict[str, Any]]:
 @retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD / 10)
 def wait_for_screens_to_sync():
     """
-    Waits for all screens to be in sync.
+    Waits for all online screens to be in sync. Offline screens are reported
+    but do not block the sync check since they cannot sync while unreachable.
     """
 
     try:
@@ -63,25 +64,32 @@ def wait_for_screens_to_sync():
         print(f"Unable to fetch screens: {error}")
         sys.exit(1)
 
-    if all(screen['in_sync'] for screen in screens):
-        return
-
     screens_not_in_sync = [screen for screen in screens if not screen['in_sync']]
 
-    print(f"...waiting for {len(screens_not_in_sync)} screen(s) to sync")
+    offline_screens = [s for s in screens_not_in_sync if s['status'].lower() == 'offline']
+    out_of_sync_screens = [s for s in screens_not_in_sync if s['status'].lower() != 'offline']
 
-    for screen in screens_not_in_sync:
-        print(f"{screen['name']}({screen['hostname']}) not in sync: {screen['status'].lower()}")
+    if offline_screens:
+        print(f"Skipping {len(offline_screens)} offline screen(s) (cannot sync while unreachable):")
+        for screen in offline_screens:
+            print(f"  OFFLINE: {screen['name']}({screen['hostname']})")
 
-    raise AssertionError("Not all screens synchronized")
+    if not out_of_sync_screens:
+        return
+
+    print(f"...waiting for {len(out_of_sync_screens)} screen(s) to sync:")
+    for screen in out_of_sync_screens:
+        print(f"  OUT OF SYNC: {screen['name']}({screen['hostname']}) — {screen['status'].lower()}")
+
+    raise AssertionError("Not all online screens synchronized")
 
 
 def get_qc_playlist_ids():
     """
-    Get all playlist starting with 'PLAYLIST_PREFIX'.
+    Get all playlists starting with 'PLAYLIST_PREFIX'.
     """
 
-    response = requests.get("https://api.screenlyapp.com/api/v3/playlists/", headers=REQUEST_HEADERS)
+    response = requests.get("https://api.screenlyapp.com/api/v4/playlists/", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     qc_playlists = []
@@ -97,10 +105,26 @@ def delete_playlist(playlist_id):
     Delete a playlist.
     """
     response = requests.delete(
-        f"https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/",
+        f"https://api.screenlyapp.com/api/v4/playlists/{playlist_id}/",
         headers=REQUEST_HEADERS,
     )
     return response.ok
+
+
+def add_asset_to_playlist(playlist_id, asset_id):
+    """
+    Add a single asset to a playlist.
+    """
+    payload = {
+        "asset_id": asset_id,
+        "duration": 10,
+    }
+    response = requests.post(
+        f"https://api.screenlyapp.com/api/v4/playlist-items/?playlist_id=eq.{playlist_id}",
+        headers=REQUEST_HEADERS,
+        json=payload,
+    )
+    response.raise_for_status()
 
 
 def create_qc_playlist():
@@ -108,27 +132,26 @@ def create_qc_playlist():
     Create a new QC playlist with random assets.
     """
 
-    current_date = datetime.utcnow()
+    current_date = datetime.now(timezone.utc)
     playlist_name = f"{PLAYLIST_PREFIX} {current_date.strftime('%Y-%m-%d @ %H:%M:%S')}"
-
-    assets = []
-    for asset in get_ten_random_assets():
-        assets.append({"id": asset, "duration": 10})
 
     payload = {
         "title": playlist_name,
-        "groups": [{"id": "all-screens"}],
         "is_enabled": True,
-        "assets": assets,
         "predicate": "TRUE",
     }
 
     response = requests.post(
-        "https://api.screenlyapp.com/api/v3/playlists/",
+        "https://api.screenlyapp.com/api/v4/playlists/",
         headers=REQUEST_HEADERS,
         json=payload,
     )
     response.raise_for_status()
+
+    playlist_id = response.json()["id"]
+
+    for asset_id in get_ten_random_assets():
+        add_asset_to_playlist(playlist_id, asset_id)
 
 
 def main():
