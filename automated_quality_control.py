@@ -89,7 +89,7 @@ def get_qc_playlist_ids():
     Get all playlists starting with 'PLAYLIST_PREFIX'.
     """
 
-    response = requests.get("https://api.screenlyapp.com/api/v4/playlists/", headers=REQUEST_HEADERS)
+    response = requests.get("https://api.screenlyapp.com/v4/playlists", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     qc_playlists = []
@@ -105,7 +105,7 @@ def delete_playlist(playlist_id):
     Delete a playlist.
     """
     response = requests.delete(
-        f"https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/",
+        f"https://api.screenlyapp.com/v4/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     return response.ok
