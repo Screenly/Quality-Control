@@ -22,7 +22,7 @@ def get_ten_random_assets():
     """
 
     response = requests.get(
-        'https://api.screenlyapp.com/api/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
+        'https://api.screenlyapp.com/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -43,7 +43,7 @@ def get_screens() -> List[Dict[str, Any]]:
     Return a list of screens in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/api/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
+    response = requests.get('https://api.screenlyapp.com/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
     response.raise_for_status()
     return response.json()
 
