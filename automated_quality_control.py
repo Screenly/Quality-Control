@@ -118,30 +118,49 @@ def delete_playlist(playlist_id):
     return response.ok
 
 
+def add_asset_to_playlist(playlist_id, asset_id):
+    """
+    Add a single asset to a playlist via the v4 playlist-items endpoint.
+    """
+    payload = {
+        "playlist_id": playlist_id,
+        "asset_id": asset_id,
+        "duration": 10,
+    }
+    response = requests.post(
+        "https://api.screenlyapp.com/v4/playlist-items",
+        headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
+        json=payload,
+    )
+    response.raise_for_status()
+
+
 def create_qc_playlist():
     """
-    Create a new QC playlist with random assets assigned to all screens.
+    Create a new QC playlist with random assets.
     """
 
     current_date = datetime.now(timezone.utc)
     playlist_name = f"{PLAYLIST_PREFIX} {current_date.strftime('%Y-%m-%d @ %H:%M:%S')}"
 
-    assets = [{"id": asset_id, "duration": 10} for asset_id in get_ten_random_assets()]
-
     payload = {
         "title": playlist_name,
-        "groups": [{"id": "all_screens"}],
         "is_enabled": True,
-        "assets": assets,
         "predicate": "TRUE",
     }
 
     response = requests.post(
-        "https://api.screenlyapp.com/api/v3/playlists/",
-        headers=REQUEST_HEADERS,
+        "https://api.screenlyapp.com/v4/playlists",
+        headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
     response.raise_for_status()
+
+    data = response.json()
+    playlist_id = data[0]["id"] if isinstance(data, list) else data["id"]
+
+    for asset_id in get_ten_random_assets():
+        add_asset_to_playlist(playlist_id, asset_id)
 
 
 def main():
