@@ -102,8 +102,15 @@ def get_qc_playlist_ids():
 
 def delete_playlist(playlist_id):
     """
-    Delete a playlist.
+    Delete a playlist and its items. In v4, playlist items must be
+    removed before the playlist itself can be deleted.
     """
+    items_response = requests.delete(
+        f"https://api.screenlyapp.com/v4/playlist-items?playlist_id=eq.{playlist_id}",
+        headers=REQUEST_HEADERS,
+    )
+    if not items_response.ok:
+        return False
     response = requests.delete(
         f"https://api.screenlyapp.com/v4/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
