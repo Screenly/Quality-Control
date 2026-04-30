@@ -168,10 +168,12 @@ def assign_playlist_to_all_screens(playlist_id):
     response.raise_for_status()
 
 
+@retry(requests.HTTPError, tries=3, delay=5)
 def create_qc_playlist():
     """
     Create a new QC playlist, populate it with random assets,
-    and assign it to all screens.
+    and assign it to all screens. Retries up to 3 times on transient
+    API errors (e.g. intermittent 401 from the PostgREST auth layer).
     """
 
     current_date = datetime.now(timezone.utc)
