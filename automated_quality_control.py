@@ -105,7 +105,7 @@ def delete_playlist(playlist_id):
     Delete a playlist.
     """
     response = requests.delete(
-        f"https://api.screenlyapp.com/api/v4/playlists/{playlist_id}/",
+        f"https://api.screenlyapp.com/api/v3/playlists/{playlist_id}/",
         headers=REQUEST_HEADERS,
     )
     return response.ok
@@ -130,7 +130,7 @@ def create_qc_playlist():
     }
 
     response = requests.post(
-        "https://api.screenlyapp.com/api/v4/playlists/",
+        "https://api.screenlyapp.com/api/v3/playlists/",
         headers=REQUEST_HEADERS,
         json=payload,
     )
