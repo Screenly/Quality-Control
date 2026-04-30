@@ -118,6 +118,21 @@ def delete_playlist(playlist_id):
     return response.ok
 
 
+def get_all_screens_label_id():
+    """
+    Return the ID of the built-in 'all-screens' label.
+    """
+    response = requests.get(
+        "https://api.screenlyapp.com/v4/labels?type=eq.all-screens",
+        headers=REQUEST_HEADERS,
+    )
+    response.raise_for_status()
+    labels = response.json()
+    if not labels:
+        raise ValueError("No 'all-screens' label found in the account")
+    return labels[0]["id"]
+
+
 def add_asset_to_playlist(playlist_id, asset_id):
     """
     Add a single asset to a playlist via the v4 playlist-items endpoint.
@@ -135,9 +150,28 @@ def add_asset_to_playlist(playlist_id, asset_id):
     response.raise_for_status()
 
 
+def assign_playlist_to_all_screens(playlist_id):
+    """
+    Assign a playlist to all screens by linking the built-in
+    'all-screens' label to the playlist.
+    """
+    label_id = get_all_screens_label_id()
+    payload = {
+        "label_id": label_id,
+        "playlist_id": playlist_id,
+    }
+    response = requests.post(
+        "https://api.screenlyapp.com/v4/labels/playlists",
+        headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
+        json=payload,
+    )
+    response.raise_for_status()
+
+
 def create_qc_playlist():
     """
-    Create a new QC playlist with random assets.
+    Create a new QC playlist, populate it with random assets,
+    and assign it to all screens.
     """
 
     current_date = datetime.now(timezone.utc)
@@ -161,6 +195,8 @@ def create_qc_playlist():
 
     for asset_id in get_ten_random_assets():
         add_asset_to_playlist(playlist_id, asset_id)
+
+    assign_playlist_to_all_screens(playlist_id)
 
 
 def main():
