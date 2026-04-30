@@ -16,6 +16,7 @@ SCREEN_SYNC_THRESHOLD = 60 * 6  # 6 minutes
 PLAYLIST_PREFIX = "QC"
 
 
+@retry(requests.HTTPError, tries=3, delay=5)
 def get_ten_random_assets():
     """
     Return 10 random assets in the account.
@@ -84,6 +85,7 @@ def wait_for_screens_to_sync():
     raise AssertionError("Not all online screens synchronized")
 
 
+@retry(requests.HTTPError, tries=3, delay=5)
 def get_qc_playlist_ids():
     """
     Get all playlists starting with 'PLAYLIST_PREFIX'.
@@ -100,6 +102,7 @@ def get_qc_playlist_ids():
     return qc_playlists
 
 
+@retry(requests.HTTPError, tries=3, delay=5)
 def delete_playlist(playlist_id):
     """
     Delete a playlist and its items. In v4, playlist items must be
@@ -109,15 +112,16 @@ def delete_playlist(playlist_id):
         f"https://api.screenlyapp.com/v4/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
-    if not items_response.ok:
-        return False
+    items_response.raise_for_status()
     response = requests.delete(
         f"https://api.screenlyapp.com/v4/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
-    return response.ok
+    response.raise_for_status()
+    return True
 
 
+@retry(requests.HTTPError, tries=3, delay=5)
 def get_all_screens_label_id():
     """
     Return the ID of the built-in 'all-screens' label.
@@ -225,8 +229,10 @@ def main():
     if len(qc_playlists) > 0:
         print("Found a QC playlist. Deleting it...")
         for playlist in qc_playlists:
-            if not delete_playlist(playlist):
-                print(f"Warning: failed to delete playlist {playlist}")
+            try:
+                delete_playlist(playlist)
+            except requests.HTTPError as error:
+                print(f"Warning: failed to delete playlist {playlist}: {error.response.status_code} {error.response.text}")
 
     print("Creating new QC playlist...")
     try:
