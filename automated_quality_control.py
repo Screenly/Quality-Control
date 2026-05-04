@@ -22,7 +22,7 @@ def get_ten_random_assets():
     """
 
     response = requests.get(
-        'https://api.screenlyapp.com/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
+        'https://api.screenlyapp.com/v4.1/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -43,7 +43,7 @@ def get_screens() -> List[Dict[str, Any]]:
     Return a list of screens in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
+    response = requests.get('https://api.screenlyapp.com/v4.1/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
     response.raise_for_status()
     return response.json()
 
@@ -89,7 +89,7 @@ def get_qc_playlist_ids():
     Get all playlists starting with 'PLAYLIST_PREFIX'.
     """
 
-    response = requests.get("https://api.screenlyapp.com/v4/playlists", headers=REQUEST_HEADERS)
+    response = requests.get("https://api.screenlyapp.com/v4.1/playlists", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     qc_playlists = []
@@ -106,13 +106,13 @@ def delete_playlist(playlist_id):
     removed before the playlist itself can be deleted.
     """
     items_response = requests.delete(
-        f"https://api.screenlyapp.com/v4/playlist-items?playlist_id=eq.{playlist_id}",
+        f"https://api.screenlyapp.com/v4.1/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     if not items_response.ok:
         return False
     response = requests.delete(
-        f"https://api.screenlyapp.com/v4/playlists?id=eq.{playlist_id}",
+        f"https://api.screenlyapp.com/v4.1/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     return response.ok
@@ -123,7 +123,7 @@ def get_all_screens_label_id():
     Return the ID of the built-in 'all-screens' label.
     """
     response = requests.get(
-        "https://api.screenlyapp.com/v4/labels?type=eq.all-screens",
+        "https://api.screenlyapp.com/v4.1/labels?type=eq.all-screens",
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -143,7 +143,7 @@ def add_asset_to_playlist(playlist_id, asset_id):
         "duration": 10,
     }
     response = requests.post(
-        "https://api.screenlyapp.com/v4/playlist-items",
+        "https://api.screenlyapp.com/v4.1/playlist-items",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
@@ -161,7 +161,7 @@ def assign_playlist_to_all_screens(playlist_id):
         "playlist_id": playlist_id,
     }
     response = requests.post(
-        "https://api.screenlyapp.com/v4/labels/playlists",
+        "https://api.screenlyapp.com/v4.1/labels/playlists",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
@@ -184,7 +184,7 @@ def create_qc_playlist():
     }
 
     response = requests.post(
-        "https://api.screenlyapp.com/v4/playlists",
+        "https://api.screenlyapp.com/v4.1/playlists",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
