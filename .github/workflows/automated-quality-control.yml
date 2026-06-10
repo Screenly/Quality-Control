@@ -24,6 +24,7 @@ jobs:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: |
           set -euo pipefail
+          API_BASE_URL="${API_BASE_URL:-https://api.screenlyapp.com}"
           current_user=$(
             curl -fsSL -H "Authorization: Token ${SCREENLY_API_TOKEN}" \
               "${API_BASE_URL}/api/v4.1/users" \
