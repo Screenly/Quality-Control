@@ -102,7 +102,7 @@ def get_qc_playlist_ids():
 
 def delete_playlist(playlist_id):
     """
-    Delete a playlist and its items. In v4, playlist items must be
+    Delete a playlist and its items. Playlist items must be
     removed before the playlist itself can be deleted.
     """
     items_response = requests.delete(
@@ -135,7 +135,7 @@ def get_all_screens_label_id():
 
 def add_asset_to_playlist(playlist_id, asset_id):
     """
-    Add a single asset to a playlist via the v4 playlist-items endpoint.
+    Add a single asset to a playlist via the playlist-items endpoint.
     """
     payload = {
         "playlist_id": playlist_id,
