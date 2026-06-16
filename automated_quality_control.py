@@ -180,7 +180,6 @@ def assign_playlist_to_all_screens(playlist_id):
     response.raise_for_status()
 
 
-@retry((requests.HTTPError,), tries=20, delay=5)
 def create_qc_playlist():
     """
     Create a new QC playlist, populate it with random assets,
