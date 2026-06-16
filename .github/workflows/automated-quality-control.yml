@@ -18,6 +18,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Screenly API whoami
+        env:
+          SCREENLY_API_TOKEN: ${{ secrets.SCREENLY_API_TOKEN }}
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          API_BASE_URL="${API_BASE_URL:-https://api.screenlyapp.com}"
+          current_user=$(
+            curl -fsSL -H "Authorization: Token ${SCREENLY_API_TOKEN}" \
+              "${API_BASE_URL}/api/v4.1/users" \
+              | jq -r '.[0] | "\(.first_name) \(.last_name) <\(.email)>"'
+          )
+          echo "Current user: ${current_user}"
+          current_team=$(
+            curl -fsSL -H "Authorization: Token ${SCREENLY_API_TOKEN}" \
+              "${API_BASE_URL}/api/v4.1/teams" \
+              | jq -r '.[] | select(.is_current == true)
+                      | "\(.name) (\(.domain)) — role: \(.role), permissions: \(.permissions)"'
+          )
+          echo "Current team: ${current_team}"
+
       - name: Run automated QC script
         env:
           SCREENLY_API_TOKEN: ${{ secrets.SCREENLY_API_TOKEN }}
