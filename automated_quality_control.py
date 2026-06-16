@@ -66,8 +66,14 @@ def wait_for_screens_to_sync():
 
     screens_not_in_sync = [screen for screen in screens if not screen['screen_statuses']['in_sync']]
 
-    offline_screens = [s for s in screens_not_in_sync if s['screen_statuses']['status'].lower() == 'offline']
-    out_of_sync_screens = [s for s in screens_not_in_sync if s['screen_statuses']['status'].lower() != 'offline']
+    offline_screens = []
+    out_of_sync_screens = []
+    for screen in screens_not_in_sync:
+        screen_statuses = screen['screen_statuses']
+        if screen_statuses['status'].lower() == 'offline':
+            offline_screens.append(screen)
+        else:
+            out_of_sync_screens.append(screen)
 
     if offline_screens:
         print(f"Skipping {len(offline_screens)} offline screen(s) (cannot sync while unreachable):")
@@ -79,7 +85,9 @@ def wait_for_screens_to_sync():
 
     print(f"...waiting for {len(out_of_sync_screens)} screen(s) to sync:")
     for screen in out_of_sync_screens:
-        print(f"  OUT OF SYNC: {screen['name']}({screen['hostname']}) — {screen['screen_statuses']['status'].lower()}")
+        screen_statuses = screen['screen_statuses']
+        status = screen_statuses['status'].lower()
+        print(f"  OUT OF SYNC: {screen['name']}({screen['hostname']}) — {status}")
 
     raise AssertionError("Not all online screens synchronized")
 
@@ -243,14 +251,22 @@ def main():
         print(f"Warning: {error}. Fetching final screen status...")
         try:
             final_screens = get_screens()
-            not_synced = [s for s in final_screens if not s['screen_statuses']['in_sync']]
-            offline = [s for s in not_synced if s['screen_statuses']['status'].lower() == 'offline']
-            out_of_sync = [s for s in not_synced if s['screen_statuses']['status'].lower() != 'offline']
+            not_synced = [screen for screen in final_screens if not screen['screen_statuses']['in_sync']]
+            offline = []
+            out_of_sync = []
+            for s in not_synced:
+                screen_statuses = s['screen_statuses']
+                if screen_statuses['status'].lower() == 'offline':
+                    offline.append(s)
+                else:
+                    out_of_sync.append(s)
             print(f"Final status: {len(offline)} offline, {len(out_of_sync)} out of sync after timeout:")
             for s in offline:
                 print(f"  OFFLINE: {s['name']}({s['hostname']})")
             for s in out_of_sync:
-                print(f"  OUT OF SYNC: {s['name']}({s['hostname']}) — {s['screen_statuses']['status'].lower()}")
+                screen_statuses = s['screen_statuses']
+                status = screen_statuses['status'].lower()
+                print(f"  OUT OF SYNC: {s['name']}({s['hostname']}) — {status}")
         except Exception as fetch_error:
             print(f"Could not fetch final screen status: {fetch_error}")
 
