@@ -16,26 +16,36 @@ SCREEN_SYNC_THRESHOLD = 60 * 6  # 6 minutes
 PLAYLIST_PREFIX = "QC"
 
 
-def get_ten_random_assets():
+def get_team_id() -> str:
     """
-    Return 10 random assets in the account.
+    Return the current account's team ID via the built-in all-screens label.
     """
-
     response = requests.get(
-        'https://api.screenlyapp.com/v4/assets?select=id&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
+        "https://api.screenlyapp.com/v4/labels?type=eq.all-screens",
+        headers=REQUEST_HEADERS,
+    )
+    response.raise_for_status()
+    labels = response.json()
+    if not labels:
+        raise ValueError("No 'all-screens' label found in the account")
+    return labels[0]["team_id"]
+
+
+def get_ten_random_assets(team_id: str) -> List[str]:
+    """
+    Return 10 random asset IDs that belong to the current team.
+    Filtering by team_id ensures the token has permission to add them to playlists.
+    """
+    response = requests.get(
+        f'https://api.screenlyapp.com/v4/assets?select=id&team_id=eq.{team_id}&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
 
-    asset_count = len(response.json())
+    assets = response.json()
+    asset_count = len(assets)
 
-    # Pick 10 random assets
-    asset_list = []
-    for i in range(10):
-        random_index = random.randint(0, asset_count - 1)
-        asset_list.append(response.json()[random_index]["id"])
-
-    return asset_list
+    return [assets[random.randint(0, asset_count - 1)]["id"] for _ in range(10)]
 
 
 def get_screens() -> List[Dict[str, Any]]:
@@ -102,9 +112,13 @@ def get_qc_playlist_ids():
 
 def delete_playlist(playlist_id):
     """
-    Delete a playlist and its items. In v4, playlist items must be
-    removed before the playlist itself can be deleted.
+    Delete a playlist and its items. In v4, label associations and playlist
+    items must be removed before the playlist itself can be deleted.
     """
+    requests.delete(
+        f"https://api.screenlyapp.com/v4/labels/playlists?playlist_id=eq.{playlist_id}",
+        headers=REQUEST_HEADERS,
+    )
     items_response = requests.delete(
         f"https://api.screenlyapp.com/v4/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
@@ -162,7 +176,7 @@ def assign_playlist_to_all_screens(playlist_id):
     }
     response = requests.post(
         "https://api.screenlyapp.com/v4/labels/playlists",
-        headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
+        headers={**REQUEST_HEADERS, "Prefer": "return=representation, resolution=ignore-duplicates"},
         json=payload,
     )
     response.raise_for_status()
@@ -192,10 +206,15 @@ def create_qc_playlist():
 
     data = response.json()
     playlist_id = data[0]["id"] if isinstance(data, list) else data["id"]
+    print(f"Playlist created: {playlist_id}")
 
-    for asset_id in get_ten_random_assets():
+    team_id = get_team_id()
+
+    print("Adding assets to playlist...")
+    for asset_id in get_ten_random_assets(team_id):
         add_asset_to_playlist(playlist_id, asset_id)
 
+    print("Assigning playlist to all screens...")
     assign_playlist_to_all_screens(playlist_id)
 
 
@@ -230,10 +249,10 @@ def main():
     try:
         create_qc_playlist()
     except requests.HTTPError as error:
-        print(f"Unable to create playlist: {error.response.status_code} {error.response.text}")
+        print(f"QC playlist setup failed: {error.response.status_code} {error.response.text}")
         sys.exit(1)
     except Exception as error:
-        print(f"Unable to create playlist: {error}")
+        print(f"QC playlist setup failed: {error}")
         sys.exit(1)
 
     print("Waiting for screens to sync...")
