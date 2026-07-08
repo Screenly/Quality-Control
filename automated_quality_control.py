@@ -18,17 +18,17 @@ PLAYLIST_PREFIX = "QC"
 
 def get_team_id() -> str:
     """
-    Return the current account's team ID via the built-in all-screens label.
+    Return the current account's team ID.
     """
     response = requests.get(
-        "https://api.screenlyapp.com/v4/labels?type=eq.all-screens",
+        "https://api.screenlyapp.com/v4.1/teams?is_current=eq.true",
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
-    labels = response.json()
-    if not labels:
-        raise ValueError("No 'all-screens' label found in the account")
-    return labels[0]["team_id"]
+    teams = response.json()
+    if not teams:
+        raise ValueError("No current team found for this token")
+    return teams[0]["id"]
 
 
 def get_ten_random_assets(team_id: str) -> List[str]:
