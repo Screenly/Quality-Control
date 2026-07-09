@@ -213,7 +213,7 @@ def create_qc_playlist():
     }
 
     response = requests.post(
-        f"{SCREENLY_API_BASE_URL}/v4/playlists",
+        f"{SCREENLY_API_BASE_URL}/v4.1/playlists",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
