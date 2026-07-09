@@ -8,6 +8,7 @@ import requests
 from retry import retry
 
 API_TOKEN = os.environ.get("SCREENLY_API_TOKEN")
+SCREENLY_API_BASE_URL = "https://api.screenlyapp.com"
 REQUEST_HEADERS = {
     "Authorization": f"Token {API_TOKEN}",
     "Content-Type": "application/json",
@@ -21,7 +22,7 @@ def get_team_id() -> str:
     Return the current account's team ID.
     """
     response = requests.get(
-        "https://api.screenlyapp.com/v4.1/teams?is_current=eq.true",
+        f"{SCREENLY_API_BASE_URL}/v4.1/teams?is_current=eq.true",
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -37,7 +38,7 @@ def get_ten_random_assets(team_id: str) -> List[str]:
     Filtering by team_id ensures the token has permission to add them to playlists.
     """
     response = requests.get(
-        f'https://api.screenlyapp.com/v4/assets?select=id&team_id=eq.{team_id}&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
+        f'{SCREENLY_API_BASE_URL}/v4/assets?select=id&team_id=eq.{team_id}&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -54,7 +55,7 @@ def get_screens() -> List[Dict[str, Any]]:
     Return a list of screens in the account.
     """
 
-    response = requests.get('https://api.screenlyapp.com/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
+    response = requests.get(f'{SCREENLY_API_BASE_URL}/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
     response.raise_for_status()
     return response.json()
 
@@ -100,7 +101,7 @@ def get_qc_playlist_ids():
     Get all playlists starting with 'PLAYLIST_PREFIX'.
     """
 
-    response = requests.get("https://api.screenlyapp.com/v4/playlists", headers=REQUEST_HEADERS)
+    response = requests.get(f"{SCREENLY_API_BASE_URL}/v4/playlists", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     qc_playlists = []
@@ -117,19 +118,19 @@ def delete_playlist(playlist_id):
     items must be removed before the playlist itself can be deleted.
     """
     labels_response = requests.delete(
-        f"https://api.screenlyapp.com/v4/labels/playlists?playlist_id=eq.{playlist_id}",
+        f"{SCREENLY_API_BASE_URL}/v4/labels/playlists?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     if not labels_response.ok:
         return False
     items_response = requests.delete(
-        f"https://api.screenlyapp.com/v4/playlist-items?playlist_id=eq.{playlist_id}",
+        f"{SCREENLY_API_BASE_URL}/v4/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     if not items_response.ok:
         return False
     response = requests.delete(
-        f"https://api.screenlyapp.com/v4/playlists?id=eq.{playlist_id}",
+        f"{SCREENLY_API_BASE_URL}/v4/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     return response.ok
@@ -140,7 +141,7 @@ def get_all_screens_label_id():
     Return the ID of the built-in 'all-screens' label.
     """
     response = requests.get(
-        "https://api.screenlyapp.com/v4/labels?type=eq.all-screens",
+        f"{SCREENLY_API_BASE_URL}/v4/labels?type=eq.all-screens",
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
@@ -160,7 +161,7 @@ def add_asset_to_playlist(playlist_id, asset_id):
         "duration": 10,
     }
     response = requests.post(
-        "https://api.screenlyapp.com/v4/playlist-items",
+        f"{SCREENLY_API_BASE_URL}/v4/playlist-items",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
@@ -178,7 +179,7 @@ def assign_playlist_to_all_screens(playlist_id):
         "playlist_id": playlist_id,
     }
     response = requests.post(
-        "https://api.screenlyapp.com/v4/labels/playlists",
+        f"{SCREENLY_API_BASE_URL}/v4/labels/playlists",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation, resolution=ignore-duplicates"},
         json=payload,
     )
@@ -201,7 +202,7 @@ def create_qc_playlist():
     }
 
     response = requests.post(
-        "https://api.screenlyapp.com/v4/playlists",
+        f"{SCREENLY_API_BASE_URL}/v4/playlists",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
