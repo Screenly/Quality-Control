@@ -43,9 +43,10 @@ def get_ten_random_assets(team_id: str) -> List[str]:
     response.raise_for_status()
 
     assets = response.json()
-    asset_count = len(assets)
+    if not assets:
+        raise ValueError(f"No eligible assets found for team {team_id}")
 
-    return [assets[random.randint(0, asset_count - 1)]["id"] for _ in range(10)]
+    return [random.choice(assets)["id"] for _ in range(10)]
 
 
 def get_screens() -> List[Dict[str, Any]]:
@@ -115,10 +116,12 @@ def delete_playlist(playlist_id):
     Delete a playlist and its items. In v4, label associations and playlist
     items must be removed before the playlist itself can be deleted.
     """
-    requests.delete(
+    labels_response = requests.delete(
         f"https://api.screenlyapp.com/v4/labels/playlists?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
+    if not labels_response.ok:
+        return False
     items_response = requests.delete(
         f"https://api.screenlyapp.com/v4/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
