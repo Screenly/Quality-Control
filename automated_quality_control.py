@@ -190,7 +190,7 @@ def assign_playlist_to_all_screens(playlist_id):
         "playlist_id": playlist_id,
     }
     response = requests.post(
-        f"{SCREENLY_API_BASE_URL}/v4/labels/playlists",
+        f"{SCREENLY_API_BASE_URL}/v4.1/labels/playlists",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation, resolution=ignore-duplicates"},
         json=payload,
     )
