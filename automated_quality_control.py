@@ -38,7 +38,7 @@ def get_ten_random_assets(team_id: str) -> List[str]:
     Filtering by team_id ensures the token has permission to add them to playlists.
     """
     response = requests.get(
-        f'{SCREENLY_API_BASE_URL}/v4/assets?select=id&team_id=eq.{team_id}&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
+        f'{SCREENLY_API_BASE_URL}/v4.1/assets?select=id&team_id=eq.{team_id}&type=in.("appweb","audio","edge-app","image","video","web")&status=in.("finished","processing")',
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
