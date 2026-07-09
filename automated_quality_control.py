@@ -112,7 +112,7 @@ def get_qc_playlist_ids():
     Get all playlists starting with 'PLAYLIST_PREFIX'.
     """
 
-    response = requests.get(f"{SCREENLY_API_BASE_URL}/v4/playlists", headers=REQUEST_HEADERS)
+    response = requests.get(f"{SCREENLY_API_BASE_URL}/v4.1/playlists", headers=REQUEST_HEADERS)
     response.raise_for_status()
 
     qc_playlists = []
