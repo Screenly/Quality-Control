@@ -164,7 +164,7 @@ def get_all_screens_label_id():
 
 def add_asset_to_playlist(playlist_id, asset_id):
     """
-    Add a single asset to a playlist via the v4 playlist-items endpoint.
+    Add a single asset to a playlist via the v4.1 playlist-items endpoint.
     """
     payload = {
         "playlist_id": playlist_id,
@@ -172,7 +172,7 @@ def add_asset_to_playlist(playlist_id, asset_id):
         "duration": 10,
     }
     response = requests.post(
-        f"{SCREENLY_API_BASE_URL}/v4/playlist-items",
+        f"{SCREENLY_API_BASE_URL}/v4.1/playlist-items",
         headers={**REQUEST_HEADERS, "Prefer": "return=representation"},
         json=payload,
     )
