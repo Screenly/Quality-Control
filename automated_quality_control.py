@@ -152,7 +152,7 @@ def get_all_screens_label_id():
     Return the ID of the built-in 'all-screens' label.
     """
     response = requests.get(
-        f"{SCREENLY_API_BASE_URL}/v4/labels?type=eq.all-screens",
+        f"{SCREENLY_API_BASE_URL}/v4.1/labels?type=eq.all-screens",
         headers=REQUEST_HEADERS,
     )
     response.raise_for_status()
