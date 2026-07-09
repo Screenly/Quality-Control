@@ -52,12 +52,23 @@ def get_ten_random_assets(team_id: str) -> List[str]:
 
 def get_screens() -> List[Dict[str, Any]]:
     """
-    Return a list of screens in the account.
+    Return a list of screens in the account. In v4.1, status and in_sync
+    live in the screen_statuses view, so they are embedded and flattened
+    into each screen dict.
     """
 
-    response = requests.get(f'{SCREENLY_API_BASE_URL}/v4/screens?select=id,name,hostname,status,in_sync&type=eq.hardware&is_enabled=eq.true', headers=REQUEST_HEADERS)
+    response = requests.get(
+        f'{SCREENLY_API_BASE_URL}/v4.1/screens?select=id,name,hostname,screen_statuses(status,in_sync)&type=eq.hardware&is_enabled=eq.true',
+        headers=REQUEST_HEADERS,
+    )
     response.raise_for_status()
-    return response.json()
+
+    screens = response.json()
+    for screen in screens:
+        screen_status = screen.pop("screen_statuses") or {}
+        screen["status"] = screen_status.get("status", "offline")
+        screen["in_sync"] = screen_status.get("in_sync", False)
+    return screens
 
 
 @retry(AssertionError, tries=10, delay=SCREEN_SYNC_THRESHOLD / 10)
