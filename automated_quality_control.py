@@ -129,19 +129,19 @@ def delete_playlist(playlist_id):
     items must be removed before the playlist itself can be deleted.
     """
     labels_response = requests.delete(
-        f"{SCREENLY_API_BASE_URL}/v4/labels/playlists?playlist_id=eq.{playlist_id}",
+        f"{SCREENLY_API_BASE_URL}/v4.1/labels/playlists?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     if not labels_response.ok:
         return False
     items_response = requests.delete(
-        f"{SCREENLY_API_BASE_URL}/v4/playlist-items?playlist_id=eq.{playlist_id}",
+        f"{SCREENLY_API_BASE_URL}/v4.1/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     if not items_response.ok:
         return False
     response = requests.delete(
-        f"{SCREENLY_API_BASE_URL}/v4/playlists?id=eq.{playlist_id}",
+        f"{SCREENLY_API_BASE_URL}/v4.1/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     return response.ok
