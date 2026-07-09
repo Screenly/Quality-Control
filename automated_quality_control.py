@@ -125,7 +125,7 @@ def get_qc_playlist_ids():
 
 def delete_playlist(playlist_id):
     """
-    Delete a playlist and its items. In v4, label associations and playlist
+    Delete a playlist and its items. In v4.1, label associations and playlist
     items must be removed before the playlist itself can be deleted.
     """
     labels_response = requests.delete(
@@ -133,17 +133,21 @@ def delete_playlist(playlist_id):
         headers=REQUEST_HEADERS,
     )
     if not labels_response.ok:
+        print(f"Failed to delete label associations for playlist {playlist_id}: {labels_response.status_code} {labels_response.text}")
         return False
     items_response = requests.delete(
         f"{SCREENLY_API_BASE_URL}/v4.1/playlist-items?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
     if not items_response.ok:
+        print(f"Failed to delete items for playlist {playlist_id}: {items_response.status_code} {items_response.text}")
         return False
     response = requests.delete(
         f"{SCREENLY_API_BASE_URL}/v4.1/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
+    if not response.ok:
+        print(f"Failed to delete playlist {playlist_id}: {response.status_code} {response.text}")
     return response.ok
 
 
