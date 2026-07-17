@@ -125,23 +125,35 @@ def get_qc_playlist_ids():
 
 def delete_playlist(playlist_id):
     """
-    Delete a playlist and its items. In v4.1, label associations and playlist
-    items must be removed before the playlist itself can be deleted.
+    Delete a QC playlist. In v4.1, label associations must be removed first,
+    and DELETE /labels/playlists requires a label_id filter.
+    Playlist items are left for the API to cascade with the playlist.
     """
-    labels_response = requests.delete(
+    associations_response = requests.get(
         f"{SCREENLY_API_BASE_URL}/v4.1/labels/playlists?playlist_id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
     )
-    if not labels_response.ok:
-        print(f"Failed to delete label associations for playlist {playlist_id}: {labels_response.status_code} {labels_response.text}")
+    if not associations_response.ok:
+        print(
+            f"Failed to fetch label associations for playlist {playlist_id}: "
+            f"{associations_response.status_code} {associations_response.text}"
+        )
         return False
-    items_response = requests.delete(
-        f"{SCREENLY_API_BASE_URL}/v4.1/playlist-items?playlist_id=eq.{playlist_id}",
-        headers=REQUEST_HEADERS,
-    )
-    if not items_response.ok:
-        print(f"Failed to delete items for playlist {playlist_id}: {items_response.status_code} {items_response.text}")
-        return False
+
+    for association in associations_response.json():
+        label_id = association["label_id"]
+        labels_response = requests.delete(
+            f"{SCREENLY_API_BASE_URL}/v4.1/labels/playlists"
+            f"?label_id=eq.{label_id}&playlist_id=eq.{playlist_id}",
+            headers=REQUEST_HEADERS,
+        )
+        if not labels_response.ok:
+            print(
+                f"Failed to delete label association {label_id} for playlist {playlist_id}: "
+                f"{labels_response.status_code} {labels_response.text}"
+            )
+            return False
+
     response = requests.delete(
         f"{SCREENLY_API_BASE_URL}/v4.1/playlists?id=eq.{playlist_id}",
         headers=REQUEST_HEADERS,
