@@ -24,10 +24,15 @@ jobs:
         run: |
           # Dependabot-triggered runs read from a separate secret store and do
           # not receive SCREENLY_API_TOKEN, so this job talks to no devices and
-          # exits 1 on every dependency PR. The hourly schedule and pushes to
-          # master still exercise the real check.
-          if [ -z "$SCREENLY_API_TOKEN" ]; then
-            echo "::notice::SCREENLY_API_TOKEN is not available to this run; skipping the live device check."
+          # exits 1 on every dependency PR.
+          #
+          # The skip is limited to pull_request events on purpose. On the hourly
+          # schedule and on pushes, an absent token means the secret itself is
+          # gone, not that this run was never meant to have one -- so the script
+          # runs and fails, rather than reporting a green live-device check that
+          # never contacted a device.
+          if [ -z "$SCREENLY_API_TOKEN" ] && [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            echo "::notice::SCREENLY_API_TOKEN is not available to pull request runs; skipping the live device check."
             exit 0
           fi
           python -u automated_quality_control.py
